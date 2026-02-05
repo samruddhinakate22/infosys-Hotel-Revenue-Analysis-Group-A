@@ -20,6 +20,15 @@ Created Revenue Column
 ```
 Revenue = if [is_canceled] = 1 then 0 else [adr]*[total_nights]
 ```
+
+Created Room_Category Column
+```
+room_category = Table.AddColumn(#"Changed Type2", "room_category", each if List.Contains({"A","B"}, [reserved_room_type]) then "Standard"
+else if List.Contains({"C","D"}, [reserved_room_type]) then "Deluxe"
+else if List.Contains({"E","F","G"}, [reserved_room_type]) then "Suite"
+else "Economy")
+```
+
 ### Step - 3: New Measures
 #### Total Revenue
 ``` DAX
