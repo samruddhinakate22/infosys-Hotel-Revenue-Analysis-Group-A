@@ -1,18 +1,20 @@
-##Hotel Revenue Analysis – Milestone 3
- Project Overview
+Hotel Revenue Analysis – Module 4
+Forecasting & Advanced Analytics (Power BI + Prophet)
+Project Overview
 
-This project analyzes hotel booking, occupancy, and revenue patterns using Power BI.
-Milestone 3 focuses on forecasting future bookings, understanding cancellation behavior, and enabling data-driven business decisions through interactive dashboards.
+This module focuses on forecasting future hotel bookings and analyzing demand trends using a combination of Power BI, DAX, and Python (Prophet).
+The objective is to support data-driven decision-making for pricing, capacity planning, and promotional strategy.
 
-### Home Page
+Application Pages Overview
+Home Page
 
-The Home Page acts as a central navigation hub for the entire report.
+The Home Page serves as the central navigation hub for the entire report.
 
 Key Features
 
-Interactive menu using Bookmarks
+Interactive navigation menu using Bookmarks
 
-Navigation to all major sections:
+Seamless access to all report sections:
 
 Info & Discount Deals
 
@@ -26,13 +28,12 @@ About Us
 
 Clean, executive-friendly layout with hotel branding
 
- Home Page Preview
+Preview
 
-![Home Page](Screenshot/Home Page.png)
 
-###Info & Discount Deals Page
+Info & Discount Deals Page
 
-This page highlights promotional offers based on guest type, improving targeted marketing strategies.
+This page highlights targeted promotional offers based on guest type to support personalized marketing.
 
 Key Features
 
@@ -46,80 +47,87 @@ Family
 
 Solo
 
-Image switching using Bookmarks + Selection Pane
+Dynamic image switching using Bookmarks and Selection Pane
 
-Discounts dynamically displayed based on user selection
+Discount visibility updated based on user selection
 
-Info & Discount Deals Preview
+Preview
 
-![Info & Discount Page](Screenshot/Info & Discount page.png)
 
-###About Us Page
+About Us Page
 
-The About Us page provides a business overview of the hotel and its data-driven vision.
+The About Us page presents a business overview and the hotel’s data-driven vision.
 
 About the Hotel
+The hotel provides comfortable stays and premium service for both business and leisure travelers.
+By leveraging analytics and forecasting, the hotel aims to:
 
-The hotel delivers comfortable stays and premium service for both business and leisure travelers.
-By leveraging data-driven insights, the hotel aims to optimize operations, enhance guest experience, and achieve sustainable revenue growth.
+Optimize operations
+
+Enhance guest experience
+
+Achieve sustainable revenue growth
 
 Additional Insights
 
 Global revenue distribution by country
 
-Built-in Q&A visual for quick executive queries
+Built-in Q&A visual for executive queries
 
 Feedback interaction button
 
-About Us Page Preview
+Preview
 
-![About Us Page](Screenshot/About us page.png)
 
-### Forecasting Methodology
+Forecasting Methodology
 
-To forecast future hotel bookings, a structured time-series forecasting approach was implemented using Power BI, DAX, and Python (Prophet). The methodology followed these steps:
+A structured time-series forecasting approach was implemented to predict future booking demand.
+The workflow integrates Power BI for data preparation and Python (Prophet) for forecasting.
 
-1  Creation of Month-End Date Column
+Step 1: Creation of Month-End Date Column
 
-A new calculated column was created to standardize all bookings at a monthly granularity, which is required for time-series forecasting.
+A calculated column was created to standardize bookings at a monthly granularity, required for time-series analysis.
 
 Month_End_Date = EOMONTH ( Raw_Fact[arrival_date], 0 )
 
 
-This ensures all bookings are aligned to the end of each month, improving consistency and trend detection.
+This ensures all bookings align to the end of each month, improving trend consistency.
 
-2 Monthly Aggregation of Bookings
+Step 2: Monthly Aggregation of Bookings
 
-A new summarized table was created to aggregate total bookings per month.
+Bookings were aggregated at a monthly level using a summarized table.
 
 Monthly_Bookings =
 SUMMARIZE (
     Raw_Fact,
     Raw_Fact[Month_End_Date],
-    "Total_Bookings",
-    COUNT ( Raw_Fact[booking_id] )
+    "Total_Bookings", COUNT ( Raw_Fact[booking_id] )
 )
 
 
-This table serves as the forecast input dataset, containing:
+Resulting Dataset
 
 Month_End_Date → Time dimension
 
-Total_Bookings → Target variable
+Total_Bookings → Forecast target variable
 
-3 Export of Aggregated Data
+Step 3: Export of Aggregated Data
 
-The Monthly_Bookings table was exported from Power BI as a CSV file to enable advanced forecasting using Python.
+The Monthly_Bookings table was exported from Power BI as a CSV file.
 
-This step separates data preparation (Power BI) from modeling (Python) for better control and transparency.
+This separation allows:
 
-4 Forecasting Using Prophet (Python)
+Power BI → Data preparation & visualization
 
-The exported dataset was loaded into Power BI using a Python script, and the Prophet forecasting model was applied.
+Python → Advanced forecasting
 
-Key steps included:
+Step 4: Forecasting Using Prophet (Python)
 
-Renaming columns to Prophet format (ds, y)
+The exported dataset was loaded into Power BI using a Python script and processed with Facebook Prophet.
+
+Key Processing Steps
+
+Column renaming to Prophet format (ds, y)
 
 Data type validation
 
@@ -130,17 +138,23 @@ Forecasting 24 future months (2 years)
 import pandas as pd
 from prophet import Prophet
 
+# Copy Power BI input
 df = dataset.copy()
 
+# Rename columns for Prophet
 df = df.rename(columns={
     'Month_End_Date': 'ds',
     'Sum of Total_Bookings': 'y'
 })
 
+# Ensure correct data types
 df['ds'] = pd.to_datetime(df['ds'])
 df['y'] = pd.to_numeric(df['y'])
+
+# Remove null values
 df = df.dropna()
 
+# Create and train Prophet model
 model = Prophet(
     yearly_seasonality=True,
     weekly_seasonality=False,
@@ -149,30 +163,33 @@ model = Prophet(
 
 model.fit(df)
 
+# Generate future dates (24 months)
 future = model.make_future_dataframe(
     periods=24,
     freq='ME'
 )
 
+# Forecast
 forecast = model.predict(future)
 
+# Output back to Power BI
 result = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
 
-5 Integration Back into Power BI
+Step 5: Integration Back into Power BI
 
-The forecast output (yhat, yhat_lower, yhat_upper) was loaded back into Power BI and used to create:
+The forecast output was reintegrated into Power BI and used to create:
 
 Forecast KPIs
 
 Actual vs Forecast trend analysis
 
-Confidence interval visuals
+Confidence interval bands
 
 Peak demand identification
 
-✔ Outcome
+Outcome & Business Value
 
-This forecasting approach enables:
+This forecasting module enables:
 
 Accurate prediction of future booking demand
 
@@ -180,4 +197,4 @@ Identification of peak booking periods
 
 Improved planning for pricing, staffing, and promotions
 
-Data-driven revenue optimization decisions
+Strong support for data-driven revenue optimization
